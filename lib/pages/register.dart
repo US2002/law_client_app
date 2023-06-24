@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:law_client_app/pages/lawyer.dart';
 import 'package:law_client_app/pages/login.dart';
 
 class MyRegister extends StatefulWidget {
@@ -9,6 +11,15 @@ class MyRegister extends StatefulWidget {
 }
 
 class _MyRegisterState extends State<MyRegister> {
+  Future navigateToLawyerPage(context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return lawyerSignUp();
+      }),
+    );
+  }
+
   Future navigateToLoginPage(context) async {
     Navigator.push(
       context,
@@ -17,6 +28,8 @@ class _MyRegisterState extends State<MyRegister> {
       }),
     );
   }
+
+  String? newValue;
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +63,9 @@ class _MyRegisterState extends State<MyRegister> {
                   style: TextStyle(color: Colors.white, fontSize: 33),
                 ),
               ),
-              SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.only(top: height * 0.28),
+              Container(
+                padding: EdgeInsets.only(top: height * 0.28),
+                child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -80,6 +93,45 @@ class _MyRegisterState extends State<MyRegister> {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   )),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[50],
+                                  border: Border.all(
+                                      color: Colors.white,
+                                      width: 1), //border of dropdown button
+                                  borderRadius: BorderRadius.circular(
+                                      50), //border raiuds of dropdown button
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                        color:
+                                            Colors.blueGrey, //shadow for button
+                                        blurRadius: 5) //blur radius of shadow
+                                  ]),
+                              child: Center(
+                                child: DropdownButton<String>(
+                                    hint: Text('Choose'),
+                                    onChanged: (String? changedValue) {
+                                      newValue = changedValue;
+                                      setState(() {
+                                        newValue;
+                                        // print(newValue);
+                                      });
+                                    },
+                                    value: newValue,
+                                    items: <String>[
+                                      'Lawyer',
+                                      'Client',
+                                    ].map((String value) {
+                                      return new DropdownMenuItem<String>(
+                                        value: value,
+                                        child: new Text(value),
+                                      );
+                                    }).toList()),
+                              ),
                             ),
                             SizedBox(
                               height: 30,
@@ -133,6 +185,38 @@ class _MyRegisterState extends State<MyRegister> {
                             SizedBox(
                               height: 40,
                             ),
+                            IntlPhoneField(
+                              // focusNode: focusNode,
+                              decoration: InputDecoration(
+                                  hintText: "Phone Number",
+                                  hintStyle: TextStyle(color: Colors.white),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  )),
+                              languageCode: "en",
+                              initialCountryCode: 'IN',
+                              onChanged: (phone) {
+                                print(phone.completeNumber);
+                              },
+                              onCountryChanged: (country) {
+                                print('Country changed to: ' + country.name);
+                              },
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -148,7 +232,13 @@ class _MyRegisterState extends State<MyRegister> {
                                   backgroundColor: Color(0xff4c505b),
                                   child: IconButton(
                                       color: Colors.white,
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        if (newValue == 'Lawyer') {
+                                          navigateToLawyerPage(context);
+                                        } else {
+                                          navigateToLoginPage(context);
+                                        }
+                                      },
                                       icon: Icon(
                                         Icons.arrow_forward,
                                       )),
