@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -13,8 +14,13 @@ class lawyerSignUp extends StatefulWidget {
 
 class _lawyerSignUpState extends State<lawyerSignUp> {
   PlatformFile? pickedFile;
+  UploadTask? uploadTask;
+
   Future selectFile() async {
-    final result = await FilePicker.platform.pickFiles();
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'doc'],
+    );
     if (result == null) return;
 
     setState(() {
@@ -23,17 +29,58 @@ class _lawyerSignUpState extends State<lawyerSignUp> {
   }
 
   Future uploadFile() async {
-    final path = 'files/${pickedFile!.name}';
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+    final path = 'Files/${pickedFile!.name}';
     final file = File(pickedFile!.path!);
 
     final ref = FirebaseStorage.instance.ref().child(path);
-    ref.putFile(file);
+    uploadTask = ref.putFile(file);
+    pickedFile = null;
+
+    final snapshot = await uploadTask!.whenComplete(() {});
+
+    final urlDownload = await snapshot.ref.getDownloadURL();
+    print('Download URL: $urlDownload');
   }
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    Widget buildProgress() => StreamBuilder<TaskSnapshot>(
+        stream: uploadTask?.snapshotEvents,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final data = snapshot.data!;
+            double progress = data.bytesTransferred / data.totalBytes;
+
+            return SizedBox(
+              height: 20,
+              width: width * 0.5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.grey,
+                    color: Colors.green,
+                  ),
+                  Center(
+                    child: Text(
+                      '${(100 * progress).roundToDouble()}%',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              ),
+            );
+          } else {
+            return SizedBox(
+              height: 50,
+            );
+          }
+        });
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -80,19 +127,25 @@ class _lawyerSignUpState extends State<lawyerSignUp> {
                                   )),
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 8,
                             ),
-                            ElevatedButton(
-                              onPressed: selectFile,
-                              child: Text("Select File"),
+                            if (pickedFile == null)
+                              ElevatedButton(
+                                onPressed: selectFile,
+                                child: Text("Select File"),
+                              )
+                            else
+                              ElevatedButton(
+                                onPressed: uploadFile,
+                                child: Text("Upload File"),
+                              ),
+                            SizedBox(
+                              height: 5,
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 8,
                             ),
-                            ElevatedButton(
-                              onPressed: uploadFile,
-                              child: Text("Upload File"),
-                            ),
+                            buildProgress(),
                             SizedBox(
                               height: 40,
                             ),
