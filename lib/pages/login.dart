@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_is_not_empty
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:law_client_app/pages/home.dart';
 import 'package:law_client_app/pages/register.dart';
 
 class MyLogin extends StatefulWidget {
@@ -9,11 +12,65 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
+  final email = TextEditingController();
+  final password = TextEditingController();
+
+  bool _submitted = false;
+
+  bool validate(String email) {
+    bool isvalid = EmailValidator.validate(email);
+    if (isvalid == false) {
+      return true;
+    } else {
+      return false;
+    }
+    // print(isvalid);
+  }
+
+  void _submit() {
+    setState(() => _submitted = true);
+    if (_errorTextEmail == null && _errorTextPwd == null) {
+      navigateToHomePage(context);
+    }
+  }
+
+  String? get _errorTextEmail {
+    final text = email.value.text;
+
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    if (validate(text)) {
+      return 'Enter correct mail ID';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
+  String? get _errorTextPwd {
+    final text = password.value.text;
+
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+
+    return null;
+  }
+
   Future navigateToRegisterPage(context) async {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return MyRegister();
+        return const MyRegister();
+      }),
+    );
+  }
+
+  Future navigateToHomePage(context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return const homepage();
       }),
     );
   }
@@ -31,7 +88,7 @@ class _MyLoginState extends State<MyLogin> {
         }
       },
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
               image: AssetImage('assets/login.png'), fit: BoxFit.cover),
         ),
@@ -58,8 +115,12 @@ class _MyLoginState extends State<MyLogin> {
                         child: Column(
                           children: [
                             TextField(
+                              controller: email,
                               style: TextStyle(color: Colors.black),
+                              keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
+                                  errorText:
+                                      _submitted ? _errorTextEmail : null,
                                   fillColor: Colors.grey.shade100,
                                   filled: true,
                                   hintText: "Email",
@@ -71,9 +132,11 @@ class _MyLoginState extends State<MyLogin> {
                               height: 30,
                             ),
                             TextField(
+                              controller: password,
                               style: TextStyle(),
                               obscureText: true,
                               decoration: InputDecoration(
+                                  errorText: _submitted ? _errorTextPwd : null,
                                   fillColor: Colors.grey.shade100,
                                   filled: true,
                                   hintText: "Password",
@@ -87,7 +150,7 @@ class _MyLoginState extends State<MyLogin> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
+                                const Text(
                                   'Sign in',
                                   style: TextStyle(
                                       fontSize: 27,
@@ -98,7 +161,10 @@ class _MyLoginState extends State<MyLogin> {
                                   backgroundColor: Color(0xff4c505b),
                                   child: IconButton(
                                       color: Colors.white,
-                                      onPressed: () {},
+                                      onPressed: email.value.text.isNotEmpty &&
+                                              password.value.text.isNotEmpty
+                                          ? _submit
+                                          : null,
                                       icon: Icon(
                                         Icons.arrow_forward,
                                       )),
@@ -115,7 +181,8 @@ class _MyLoginState extends State<MyLogin> {
                                   onPressed: () {
                                     navigateToRegisterPage(context);
                                   },
-                                  child: Text(
+                                  style: ButtonStyle(),
+                                  child: const Text(
                                     'Sign Up',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
@@ -123,11 +190,10 @@ class _MyLoginState extends State<MyLogin> {
                                         color: Color(0xff4c505b),
                                         fontSize: 18),
                                   ),
-                                  style: ButtonStyle(),
                                 ),
                                 TextButton(
                                     onPressed: () {},
-                                    child: Text(
+                                    child: const Text(
                                       'Forgot Password',
                                       style: TextStyle(
                                         decoration: TextDecoration.underline,

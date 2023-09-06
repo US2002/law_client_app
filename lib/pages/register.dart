@@ -1,7 +1,12 @@
+// ignore_for_file: prefer_const_constructors, unused_local_variable
+
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:law_client_app/pages/lawyer.dart';
 import 'package:law_client_app/pages/login.dart';
+
+import 'home.dart';
 
 class MyRegister extends StatefulWidget {
   const MyRegister({Key? key}) : super(key: key);
@@ -11,11 +16,85 @@ class MyRegister extends StatefulWidget {
 }
 
 class _MyRegisterState extends State<MyRegister> {
+  final name = TextEditingController();
+  final email = TextEditingController();
+  final password = TextEditingController();
+
+  bool _submitted = false;
+
+  void _submit() {
+    setState(() => _submitted = true);
+    if (_errorTextName == null &&
+        _errorTextEmail == null &&
+        _errorTextPwd == null) {
+      if (newValue == 'Lawyer') {
+        navigateToLawyerPage(context);
+      } else {
+        navigateToLoginPage(context);
+      }
+    }
+  }
+
+  bool validate(String email) {
+    bool isvalid = EmailValidator.validate(email);
+    if (isvalid == false) {
+      return true;
+    } else {
+      return false;
+    }
+    // print(isvalid);
+  }
+
+  String? get _errorTextName {
+    // at any time, we can get the text from _controller.value.text
+    final text = name.value.text;
+
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
+  String? get _errorTextEmail {
+    final text = email.value.text;
+
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    if (validate(text)) {
+      return 'Enter valid email ID';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
+  String? get _errorTextPwd {
+    final text = password.value.text;
+
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    if (text.length < 10) {
+      return 'Password less than 10 characters';
+    }
+    return null;
+  }
+
   Future navigateToLawyerPage(context) async {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return lawyerSignUp();
+      }),
+    );
+  }
+
+  Future navigateToHomePage(context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return const homepage();
       }),
     );
   }
@@ -74,8 +153,10 @@ class _MyRegisterState extends State<MyRegister> {
                         child: Column(
                           children: [
                             TextField(
+                              controller: name,
                               style: TextStyle(color: Colors.white),
                               decoration: InputDecoration(
+                                  errorText: _submitted ? _errorTextName : null,
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
@@ -105,40 +186,50 @@ class _MyRegisterState extends State<MyRegister> {
                                       width: 1), //border of dropdown button
                                   borderRadius: BorderRadius.circular(
                                       50), //border raiuds of dropdown button
-                                  boxShadow: <BoxShadow>[
+                                  boxShadow: const <BoxShadow>[
                                     BoxShadow(
                                         color:
                                             Colors.blueGrey, //shadow for button
                                         blurRadius: 5) //blur radius of shadow
                                   ]),
                               child: Center(
-                                child: DropdownButton<String>(
-                                    hint: Text('Choose'),
-                                    onChanged: (String? changedValue) {
-                                      newValue = changedValue;
-                                      setState(() {
-                                        newValue;
-                                        // print(newValue);
-                                      });
-                                    },
-                                    value: newValue,
-                                    items: <String>[
-                                      'Lawyer',
-                                      'Client',
-                                    ].map((String value) {
-                                      return new DropdownMenuItem<String>(
-                                        value: value,
-                                        child: new Text(value),
-                                      );
-                                    }).toList()),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15, right: 15),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        hint: Text('Choose'),
+                                        onChanged: (String? changedValue) {
+                                          newValue = changedValue;
+                                          setState(() {
+                                            newValue;
+                                            // print(newValue);
+                                          });
+                                        },
+                                        value: newValue,
+                                        items: <String>[
+                                          'Lawyer',
+                                          'Client',
+                                        ].map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList()),
+                                  ),
+                                ),
                               ),
                             ),
                             SizedBox(
                               height: 30,
                             ),
                             TextField(
+                              controller: email,
                               style: TextStyle(color: Colors.white),
                               decoration: InputDecoration(
+                                  errorText:
+                                      _submitted ? _errorTextEmail : null,
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
@@ -161,9 +252,11 @@ class _MyRegisterState extends State<MyRegister> {
                               height: 30,
                             ),
                             TextField(
+                              controller: password,
                               style: TextStyle(color: Colors.white),
                               obscureText: true,
                               decoration: InputDecoration(
+                                  errorText: _submitted ? _errorTextPwd : null,
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
@@ -220,25 +313,32 @@ class _MyRegisterState extends State<MyRegister> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Sign Up',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 27,
-                                      fontWeight: FontWeight.w700),
-                                ),
+                                if (newValue == 'Lawyer')
+                                  Text(
+                                    'Authenticate',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 27,
+                                        fontWeight: FontWeight.w700),
+                                  )
+                                else
+                                  Text(
+                                    'Sign Up',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 27,
+                                        fontWeight: FontWeight.w700),
+                                  ),
                                 CircleAvatar(
                                   radius: 30,
                                   backgroundColor: Color(0xff4c505b),
                                   child: IconButton(
                                       color: Colors.white,
-                                      onPressed: () {
-                                        if (newValue == 'Lawyer') {
-                                          navigateToLawyerPage(context);
-                                        } else {
-                                          navigateToLoginPage(context);
-                                        }
-                                      },
+                                      onPressed: name.value.text.isNotEmpty &&
+                                              email.value.text.isNotEmpty &&
+                                              password.value.text.isNotEmpty
+                                          ? _submit
+                                          : null,
                                       icon: Icon(
                                         Icons.arrow_forward,
                                       )),
@@ -255,6 +355,7 @@ class _MyRegisterState extends State<MyRegister> {
                                   onPressed: () {
                                     navigateToLoginPage(context);
                                   },
+                                  style: ButtonStyle(),
                                   child: Text(
                                     'Sign In',
                                     textAlign: TextAlign.left,
@@ -263,7 +364,6 @@ class _MyRegisterState extends State<MyRegister> {
                                         color: Colors.white,
                                         fontSize: 18),
                                   ),
-                                  style: ButtonStyle(),
                                 ),
                               ],
                             )
