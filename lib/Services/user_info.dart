@@ -1,36 +1,59 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
-class GetUserName extends StatelessWidget {
-  final String documentId;
+class UserInfoService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  GetUserName(this.documentId);
+  Future<String> getNameFromFirestore() async {
+    final documentId = await getFirestoreDocumentIdForCurrentUser('Lawyer');
+    if (documentId != null) {
+      final name = await _getNameFromCollection('Lawyer', documentId);
+      if (name != null) {
+        return name;
+      }
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    final clientDocumentId =
+        await getFirestoreDocumentIdForCurrentUser('Client');
+    if (clientDocumentId != null) {
+      final name = await _getNameFromCollection('Client', clientDocumentId);
+      if (name != null) {
+        return name;
+      }
+    }
 
-    return FutureBuilder<DocumentSnapshot>(
-      future: users.doc(documentId).get(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
+    return "No document found"; // Return this if no document is found in both collections
+  }
 
-        if (snapshot.hasData && !snapshot.data!.exists) {
-          return Text("Document does not exist");
-        }
+  Future<String?> getFirestoreDocumentIdForCurrentUser(
+      String collectionName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final uid = user.uid;
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .where('email', isEqualTo: user.email)
+          .get();
 
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data =
-              snapshot.data!.data() as Map<String, dynamic>;
-          print(data['name']);
-          return Text("${data['name']}");
-        }
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs[0].id;
+      }
+    }
+    return null;
+  }
 
-        return Text("loading");
-      },
-    );
+  Future<String?> _getNameFromCollection(
+      String collectionName, String documentId) async {
+    final userDoc = await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(documentId)
+        .get();
+
+    if (userDoc.exists) {
+      return userDoc.data()?['name'];
+    } else {
+      return null;
+    }
   }
 }

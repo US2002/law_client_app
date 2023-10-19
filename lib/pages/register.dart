@@ -6,6 +6,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:law_client_app/Services/firebase_auth.dart';
 import 'package:law_client_app/widgets/widgets.dart';
 
+import '../Services/AlertBox.dart';
 import 'home.dart';
 
 class MyRegister extends StatefulWidget {
@@ -26,28 +27,42 @@ class _MyRegisterState extends State<MyRegister> {
 
   void _submit() {
     setState(() => _submitted = true);
-    if (_errorTextName == null &&
-        _errorTextEmail == null &&
-        _errorTextPwd == null) {
-      print("PASSED");
+    if (validateInputs() && passConfirmed()) {
       if (newValue == 'Lawyer') {
         signUpWithLawyerEmail(
-            context: context,
-            userName: name.text,
-            userEmail: email.text,
-            userPassword: password.text,
-            phoneNumber: phnNumber.text);
+          context: context,
+          userName: name.text,
+          userEmail: email.text,
+          userPassword: password.text,
+          phoneNumber: phnNumber.text,
+        );
       } else if (newValue == "Client") {
         signUpWithClientEmail(
-            context: context,
-            userName: name.text,
-            userEmail: email.text,
-            userPassword: password.text,
-            phoneNumber: phnNumber.text);
+          context: context,
+          userName: name.text,
+          userEmail: email.text,
+          userPassword: password.text,
+          phoneNumber: phnNumber.text,
+        );
       } else {
-        _submitted = false;
+        showAlertDialog(context, "Please select your role (Lawyer/Client).");
       }
     }
+  }
+
+  bool validateInputs() {
+    final errorTexts = [
+      _errorTextName,
+      _errorTextEmail,
+      _errorTextPwd,
+    ];
+
+    if (errorTexts.any((text) => text != null)) {
+      final errors = errorTexts.where((text) => text != null).join('\n');
+      showAlertDialog(context, errors);
+      return false;
+    }
+    return true;
   }
 
   bool passConfirmed() {

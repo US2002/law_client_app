@@ -23,23 +23,21 @@ class _MyLoginState extends State<MyLogin> {
 
   void _submit() {
     setState(() => _submitted = true);
-    try {
-      if (_errorTextEmail == null && _errorTextPwd == null) {
-        FirebaseAuth.instance
-            .signInWithEmailAndPassword(
-                email: email.text, password: password.text)
-            .then((value) {
-          navigateToHomePage(context);
-        });
-      }
-    } catch (e) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text(e.toString().trim()),
-            );
-          });
+    if (_errorTextEmail == null && _errorTextPwd == null) {
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: email.text, password: password.text)
+          .then((value) {
+        navigateToHomePage(context);
+      }).catchError((e) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text("Login failed. ${e.toString().trim()}"),
+              );
+            });
+      });
     }
   }
 

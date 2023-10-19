@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../Services/user_info.dart';
 import 'login.dart';
 
 class lawyerSignUp extends StatefulWidget {
@@ -155,11 +156,14 @@ class _lawyerSignUpState extends State<lawyerSignUp> {
   }
 
   Future uploadFile() async {
-    final user = FirebaseAuth.instance.currentUser!;
+    final userInfoService = UserInfoService();
+    final userName = await userInfoService.getNameFromFirestore();
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    final path = '${user.uid}/${aadhar!.name}';
-    final path2 = '${user.uid}/${bar!.name}';
+    String aadharNumber = textAadhar.text;
+    String barNumber = textBar.text;
+    final path = '$userName/$aadharNumber';
+    final path2 = '$userName/$barNumber';
 
     final file = File(aadhar!.path!);
     final file2 = File(bar!.path!);

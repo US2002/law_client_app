@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,21 +16,21 @@ Future<dynamic> signUpWithClientEmail({
   required String phoneNumber,
 }) async {
   try {
-    FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-            email: userEmail, password: userPassword)
-        .then((value) {
-      addClientDetails(userName, userEmail, phoneNumber);
-      print("Client added");
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text("Client Added!!"),
-            );
-          });
-      navigateToLoginPage(context);
-    });
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: userEmail,
+      password: userPassword,
+    );
+    await addClientDetails(userName, userEmail, phoneNumber);
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("Client Added!!"),
+          );
+        });
+
+    navigateToLoginPage(context);
   } catch (e) {
     showDialog(
         context: context,
@@ -46,11 +48,12 @@ Future<dynamic> signInWithEmail({
   required String userPassword,
 }) async {
   try {
-    FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: userEmail, password: userPassword)
-        .then((value) {
-      navigateToHomePage(context);
-    });
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: userEmail,
+      password: userPassword,
+    );
+
+    navigateToHomePage(context);
   } catch (e) {
     showDialog(
         context: context,
@@ -70,21 +73,21 @@ Future<dynamic> signUpWithLawyerEmail({
   required String phoneNumber,
 }) async {
   try {
-    FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-            email: userEmail, password: userPassword)
-        .then((value) {
-      addLawyerDetails(userName, userEmail, phoneNumber);
-      print("Lawyer added");
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text("Lawyer Added!!"),
-            );
-          });
-      navigateToLawyerPage(context);
-    });
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: userEmail,
+      password: userPassword,
+    );
+    addLawyerDetails(userName, userEmail, phoneNumber);
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("Lawyer Added!!"),
+          );
+        });
+
+    navigateToLawyerPage(context);
   } catch (e) {
     showDialog(
         context: context,
@@ -97,23 +100,31 @@ Future<dynamic> signUpWithLawyerEmail({
 }
 
 void addLawyerDetails(String name, String email, phoneNumber) async {
-  await FirebaseFirestore.instance.collection('Lawyer').add({
-    'name': name,
-    'email': email,
-    'phonenumber': phoneNumber,
-    'timestamp': Timestamp.now(),
-  });
-  print("Details Added");
+  try {
+    await FirebaseFirestore.instance.collection('Lawyer').add({
+      'name': name,
+      'email': email,
+      'phonenumber': phoneNumber,
+      'timestamp': Timestamp.now(),
+    });
+    print("Details Added");
+  } catch (e) {
+    print("Error adding lawyer details: $e");
+  }
 }
 
 Future addClientDetails(String name, String email, String phoneNumber) async {
-  await FirebaseFirestore.instance.collection('Client').add({
-    'name': name,
-    'email': email,
-    'phonenumber': phoneNumber,
-    'timestamp': Timestamp.now(),
-  });
-  print("Details Added");
+  try {
+    await FirebaseFirestore.instance.collection('Client').add({
+      'name': name,
+      'email': email,
+      'phonenumber': phoneNumber,
+      'timestamp': Timestamp.now(),
+    });
+    print("Details Added");
+  } catch (e) {
+    print("Error adding client details: $e");
+  }
 }
 
 Future navigateToHomePage(context) async {
