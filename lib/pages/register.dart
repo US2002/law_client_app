@@ -3,8 +3,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:law_client_app/pages/lawyer.dart';
-import 'package:law_client_app/pages/login.dart';
+import 'package:law_client_app/Services/firebase_auth.dart';
+import 'package:law_client_app/widgets/widgets.dart';
 
 import 'home.dart';
 
@@ -19,6 +19,8 @@ class _MyRegisterState extends State<MyRegister> {
   final name = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
+  final confirmpassword = TextEditingController();
+  final phnNumber = TextEditingController();
 
   bool _submitted = false;
 
@@ -27,11 +29,32 @@ class _MyRegisterState extends State<MyRegister> {
     if (_errorTextName == null &&
         _errorTextEmail == null &&
         _errorTextPwd == null) {
+      print("PASSED");
       if (newValue == 'Lawyer') {
-        navigateToLawyerPage(context);
+        signUpWithLawyerEmail(
+            context: context,
+            userName: name.text,
+            userEmail: email.text,
+            userPassword: password.text,
+            phoneNumber: phnNumber.text);
+      } else if (newValue == "Client") {
+        signUpWithClientEmail(
+            context: context,
+            userName: name.text,
+            userEmail: email.text,
+            userPassword: password.text,
+            phoneNumber: phnNumber.text);
       } else {
-        navigateToLoginPage(context);
+        _submitted = false;
       }
+    }
+  }
+
+  bool passConfirmed() {
+    if (password.text == confirmpassword.text) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -81,33 +104,6 @@ class _MyRegisterState extends State<MyRegister> {
     return null;
   }
 
-  Future navigateToLawyerPage(context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) {
-        return lawyerSignUp();
-      }),
-    );
-  }
-
-  Future navigateToHomePage(context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) {
-        return const homepage();
-      }),
-    );
-  }
-
-  Future navigateToLoginPage(context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) {
-        return MyLogin();
-      }),
-    );
-  }
-
   String? newValue;
 
   @override
@@ -152,29 +148,8 @@ class _MyRegisterState extends State<MyRegister> {
                         margin: EdgeInsets.only(left: 35, right: 35),
                         child: Column(
                           children: [
-                            TextField(
-                              controller: name,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                  errorText: _submitted ? _errorTextName : null,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  hintText: "Name",
-                                  hintStyle: TextStyle(color: Colors.white),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
-                            ),
+                            SignupTextField("Name", Icons.short_text_outlined,
+                                false, name, TextInputType.name, _submitted),
                             SizedBox(
                               height: 30,
                             ),
@@ -224,57 +199,33 @@ class _MyRegisterState extends State<MyRegister> {
                             SizedBox(
                               height: 30,
                             ),
-                            TextField(
-                              controller: email,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                  errorText:
-                                      _submitted ? _errorTextEmail : null,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  hintText: "Email",
-                                  hintStyle: TextStyle(color: Colors.white),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
-                            ),
+                            SignupTextField(
+                                "Email",
+                                Icons.email_outlined,
+                                false,
+                                email,
+                                TextInputType.emailAddress,
+                                _submitted),
                             SizedBox(
                               height: 30,
                             ),
-                            TextField(
-                              controller: password,
-                              style: TextStyle(color: Colors.white),
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                  errorText: _submitted ? _errorTextPwd : null,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  hintText: "Password",
-                                  hintStyle: TextStyle(color: Colors.white),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
+                            SignupTextField(
+                                "Password",
+                                Icons.password_outlined,
+                                true,
+                                password,
+                                TextInputType.visiblePassword,
+                                _submitted),
+                            SizedBox(
+                              height: 30,
                             ),
+                            SignupTextField(
+                                "Confirm Password",
+                                Icons.password_outlined,
+                                true,
+                                confirmpassword,
+                                TextInputType.visiblePassword,
+                                _submitted),
                             SizedBox(
                               height: 40,
                             ),
@@ -292,7 +243,7 @@ class _MyRegisterState extends State<MyRegister> {
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
-                                      color: Colors.black,
+                                      color: Colors.blueGrey,
                                     ),
                                   ),
                                   border: OutlineInputBorder(
@@ -300,11 +251,13 @@ class _MyRegisterState extends State<MyRegister> {
                                   )),
                               languageCode: "en",
                               initialCountryCode: 'IN',
+                              controller: phnNumber,
                               onChanged: (phone) {
                                 print(phone.completeNumber);
                               },
                               onCountryChanged: (country) {
-                                print('Country changed to: ' + country.name);
+                                print(phnNumber.text);
+                                print('Country changed to: ${country.name}');
                               },
                             ),
                             SizedBox(
@@ -317,15 +270,23 @@ class _MyRegisterState extends State<MyRegister> {
                                   Text(
                                     'Authenticate',
                                     style: TextStyle(
-                                        color: Colors.white,
+                                        color: Color(0xff4c505b),
+                                        fontSize: 27,
+                                        fontWeight: FontWeight.w700),
+                                  )
+                                else if (newValue == "Client")
+                                  Text(
+                                    'Sign Up',
+                                    style: TextStyle(
+                                        color: Color(0xff4c505b),
                                         fontSize: 27,
                                         fontWeight: FontWeight.w700),
                                   )
                                 else
                                   Text(
-                                    'Sign Up',
+                                    'Lawyer or Client?',
                                     style: TextStyle(
-                                        color: Colors.white,
+                                        color: Color(0xff4c505b),
                                         fontSize: 27,
                                         fontWeight: FontWeight.w700),
                                   ),
@@ -336,7 +297,9 @@ class _MyRegisterState extends State<MyRegister> {
                                       color: Colors.white,
                                       onPressed: name.value.text.isNotEmpty &&
                                               email.value.text.isNotEmpty &&
-                                              password.value.text.isNotEmpty
+                                              password.value.text.isNotEmpty &&
+                                              confirmpassword
+                                                  .value.text.isNotEmpty
                                           ? _submit
                                           : null,
                                       icon: Icon(

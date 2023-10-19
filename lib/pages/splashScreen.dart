@@ -22,7 +22,7 @@ class _splashScreenState extends State<splashScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
-        return MyLogin();
+        return const MyLogin();
       }),
     );
   }
@@ -40,14 +40,14 @@ class _splashScreenState extends State<splashScreen> {
               onLastPage = (index == 2);
             });
           },
-          children: [
+          children: const [
             page1(),
             page2(),
             page3(),
           ],
         ),
         Container(
-          alignment: Alignment(0, 0.75),
+          alignment: const Alignment(0, 0.75),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -113,7 +113,7 @@ class _splashScreenState extends State<splashScreen> {
                       backgroundColor: Colors.yellow,
                       onPressed: () {
                         _controller.nextPage(
-                          duration: Duration(milliseconds: 500),
+                          duration: const Duration(milliseconds: 500),
                           curve: Curves.easeIn,
                         );
                       },

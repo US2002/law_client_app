@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:law_client_app/pages/splashScreen.dart';
+import 'package:law_client_app/pages/mainPage.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MaterialApp(
-    home: splashScreen(),
+    home: mainPage(),
     theme: ThemeData(
       fontFamily: 'Montserrat',
     ),

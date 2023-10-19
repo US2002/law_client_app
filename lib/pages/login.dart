@@ -1,8 +1,12 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_is_not_empty
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:law_client_app/pages/home.dart';
 import 'package:law_client_app/pages/register.dart';
+import 'package:law_client_app/pages/resetPassword.dart';
+import 'package:law_client_app/widgets/widgets.dart';
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key}) : super(key: key);
@@ -17,20 +21,25 @@ class _MyLoginState extends State<MyLogin> {
 
   bool _submitted = false;
 
-  bool validate(String email) {
-    bool isvalid = EmailValidator.validate(email);
-    if (isvalid == false) {
-      return true;
-    } else {
-      return false;
-    }
-    // print(isvalid);
-  }
-
   void _submit() {
     setState(() => _submitted = true);
-    if (_errorTextEmail == null && _errorTextPwd == null) {
-      navigateToHomePage(context);
+    try {
+      if (_errorTextEmail == null && _errorTextPwd == null) {
+        FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+                email: email.text, password: password.text)
+            .then((value) {
+          navigateToHomePage(context);
+        });
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(e.toString().trim()),
+            );
+          });
     }
   }
 
@@ -62,6 +71,15 @@ class _MyLoginState extends State<MyLogin> {
       context,
       MaterialPageRoute(builder: (context) {
         return const MyRegister();
+      }),
+    );
+  }
+
+  Future navigateToResetPage(context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) {
+        return const forgotPassword();
       }),
     );
   }
@@ -114,36 +132,13 @@ class _MyLoginState extends State<MyLogin> {
                         margin: EdgeInsets.only(left: 35, right: 35),
                         child: Column(
                           children: [
-                            TextField(
-                              controller: email,
-                              style: TextStyle(color: Colors.black),
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                  errorText:
-                                      _submitted ? _errorTextEmail : null,
-                                  fillColor: Colors.grey.shade100,
-                                  filled: true,
-                                  hintText: "Email",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
-                            ),
+                            LoginTextField("Email", Icons.email_outlined, false,
+                                email, _submitted),
                             SizedBox(
                               height: 30,
                             ),
-                            TextField(
-                              controller: password,
-                              style: TextStyle(),
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                  errorText: _submitted ? _errorTextPwd : null,
-                                  fillColor: Colors.grey.shade100,
-                                  filled: true,
-                                  hintText: "Password",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
-                            ),
+                            LoginTextField("Password", Icons.password_outlined,
+                                true, password, _submitted),
                             SizedBox(
                               height: 40,
                             ),
@@ -192,7 +187,9 @@ class _MyLoginState extends State<MyLogin> {
                                   ),
                                 ),
                                 TextButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      navigateToResetPage(context);
+                                    },
                                     child: const Text(
                                       'Forgot Password',
                                       style: TextStyle(

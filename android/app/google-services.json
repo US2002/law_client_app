@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "529164060593",
-    "project_id": "lawyer-client-app-88721",
-    "storage_bucket": "lawyer-client-app-88721.appspot.com"
+    "project_number": "17863553516",
+    "project_id": "caseconnect-aafa2",
+    "storage_bucket": "caseconnect-aafa2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:529164060593:android:e4e23bb0bdf68f622edf90",
+        "mobilesdk_app_id": "1:17863553516:android:6f5e4a3c7676ac78c990c9",
         "android_client_info": {
           "package_name": "com.example.law_client_app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "529164060593-5u4fhspq0l8e0d2tl8uplaj6g4gvdogq.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBIEpgnAvgcy-9Ohuy8K-ILbsqkduglqeE"
+          "current_key": "AIzaSyC5PHWrUOGHrcqWFgOP_o1SD0k_P5DY_1c"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "529164060593-5u4fhspq0l8e0d2tl8uplaj6g4gvdogq.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

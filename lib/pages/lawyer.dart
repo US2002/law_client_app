@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -154,10 +155,11 @@ class _lawyerSignUpState extends State<lawyerSignUp> {
   }
 
   Future uploadFile() async {
+    final user = FirebaseAuth.instance.currentUser!;
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-    final path = 'Files/${aadhar!.name}';
-    final path2 = 'Files/${bar!.name}';
+    final path = '${user.uid}/${aadhar!.name}';
+    final path2 = '${user.uid}/${bar!.name}';
 
     final file = File(aadhar!.path!);
     final file2 = File(bar!.path!);
