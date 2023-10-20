@@ -7,7 +7,6 @@ import 'package:law_client_app/Services/firebase_auth.dart';
 import 'package:law_client_app/widgets/widgets.dart';
 
 import '../Services/AlertBox.dart';
-import 'home.dart';
 
 class MyRegister extends StatefulWidget {
   const MyRegister({Key? key}) : super(key: key);
