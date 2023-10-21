@@ -23,19 +23,6 @@ class _forgotPasswordState extends State<forgotPassword> {
     super.dispose();
   }
 
-  String? get _errorTextEmail {
-    final text = email.value.text;
-
-    if (text.isEmpty) {
-      return 'Can\'t be empty';
-    }
-    if (validate(text)) {
-      return 'Enter valid email ID';
-    }
-    // return null if the text is valid
-    return null;
-  }
-
   Future navigateToLoginPage(context) async {
     print("Going Back!!");
     Navigator.pop(context);

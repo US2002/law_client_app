@@ -26,7 +26,7 @@ class _MyRegisterState extends State<MyRegister> {
 
   void _submit() {
     setState(() => _submitted = true);
-    if (validateInputs() && passConfirmed()) {
+    if (validateInputs()) {
       if (newValue == 'Lawyer') {
         signUpWithLawyerEmail(
           context: context,
@@ -62,14 +62,6 @@ class _MyRegisterState extends State<MyRegister> {
       return false;
     }
     return true;
-  }
-
-  bool passConfirmed() {
-    if (password.text == confirmpassword.text) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   bool validate(String email) {
@@ -297,12 +289,18 @@ class _MyRegisterState extends State<MyRegister> {
                                         fontWeight: FontWeight.w700),
                                   )
                                 else
-                                  Text(
-                                    'Lawyer or Client?',
-                                    style: TextStyle(
+                                  Expanded(
+                                    child: Text(
+                                      'Lawyer or Client?',
+                                      style: TextStyle(
                                         color: Color(0xff4c505b),
                                         fontSize: 27,
-                                        fontWeight: FontWeight.w700),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      softWrap: false,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.fade,
+                                    ),
                                   ),
                                 CircleAvatar(
                                   radius: 30,
